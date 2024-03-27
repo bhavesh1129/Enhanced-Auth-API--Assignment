@@ -1,5 +1,7 @@
+// User model
 const mongoose = require('mongoose');
 
+// Define the user schema
 const userSchema = new mongoose.Schema({
     googleId: {
         type: String,
@@ -57,4 +59,5 @@ const userSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('User', userSchema);
+// Export the User model
+module.exports = mongoose.model('User', userSchema); 

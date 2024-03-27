@@ -1,100 +1,110 @@
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const User = require('../models/user');
-require('dotenv').config();
+// Import required modules and middleware
+const bcrypt = require('bcryptjs'); // Library for hashing passwords
+const jwt = require('jsonwebtoken'); // Library for generating JSON Web Tokens (JWT)
+const User = require('../models/user'); // User model
+require('dotenv').config(); // Load environment variables
 
+// Controller for user registration
 exports.register = async (req, res) => {
     try {
-        //get all the data from body
+        // Get username, email, and password from the request body
         const { username, email, password } = req.body;
 
-        // check that all the data should exists
+        // Check if all required data exists
         if (!(username && email && password)) {
             return res.status(400).send("Please enter all the information");
         }
 
-        // check if user already exists (email, username)
+        // Check if a user already exists with the provided email
         const existingUserWithSameEmail = await User.findOne({ email });
         if (existingUserWithSameEmail) {
-            return res.status(200).send("User already exists with same email!");
+            return res.status(200).send("User already exists with the same email!");
         }
 
+        // Check if a user already exists with the provided username
         const existingUserWithSameUsername = await User.findOne({ username });
         if (existingUserWithSameUsername) {
-            return res.status(200).send("User already exists with same username!");
+            return res.status(200).send("User already exists with the same username!");
         }
 
-        // encrypt the password
+        // Encrypt the password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // save the user in DB
+        // Create a new user in the database
         const user = await User.create({
             username,
             email,
             password: hashedPassword,
         });
 
-        // generate a token for user and send it
+        // Generate a JWT token for the user
         const token = jwt.sign({ userId: user._id, role: user.role }, process.env.SECRET_KEY, {
-            expiresIn: "1d",
+            expiresIn: "1d", // Token expires in 1 day
         });
-        user.token = token;
+
+        // Omit the password from the user object
         user.password = undefined;
-        res
-            .status(200)
-            .json({ message: "User successfully registered!", user });
+
+        // Send a response with the token and user details
+        res.status(200).json({ message: "User successfully registered!", user });
     } catch (error) {
+        // Handle errors
         res.status(400).json({ message: error.message });
     }
 };
 
+// Controller for user login
 exports.login = async (req, res) => {
     try {
-        //get all the user data
+        // Get email and password from the request body
         const { email, password } = req.body;
 
-        // check that all the data should exists
+        // Check if all required data exists
         if (!(email && password)) {
             return res.status(400).send("Please enter all the information");
         }
 
-        //find the user in the database
+        // Find the user in the database by email
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(401).send("User not found!");
         }
 
-        //match the password
+        // Check if the entered password matches the stored password
         const enteredPassword = await bcrypt.compare(password, user.password);
         if (!enteredPassword) {
             return res.status(401).send("Password is incorrect");
         }
 
+        // Generate a JWT token for the user
         const token = jwt.sign({ userId: user._id, role: user.role }, process.env.SECRET_KEY, {
-            expiresIn: "1d",
+            expiresIn: "1d", // Token expires in 1 day
         });
-        user.token = token;
+
+        // Omit the password from the user object
         user.password = undefined;
 
-        //store cookies
+        // Configure options for storing cookies
         const options = {
-            expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
-            httpOnly: true, //only manipulate by server not by client/user
+            expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // Expires in 1 day
+            httpOnly: true, // Cookie is only accessible via HTTP(S)
         };
 
-        //send the token
+        // Set the token as a cookie in the response
         res.status(200).cookie("token", token, options).json({
             message: "You have successfully logged in!",
             success: true,
             token,
         });
     } catch (error) {
+        // Handle errors
         res.status(500).json({ message: error.message });
     }
 };
 
+// Controller for user logout
 exports.logout = (req, res, next) => {
-    // To sign out, simply clear the JWT token from the client side.
+    // Clear the JWT token from the client side
     try {
         res.clearCookie("token");
         res.status(200).json({ message: "User has been Signed Out!" });
