@@ -182,4 +182,4 @@ This project is a web application built using Node.js, Express.js, MongoDB, and 
   The application includes rate limiting based on IP using Express.js middleware. We made a separate middleware in the Middleware section for this purpose.
 
 - #### Deployment:
-  The Node.js application is deployed on Render. The deployment link is [Voosh Backend Assignment](https://voosh-auth-api-assignment-bhavesh1129.up.railway.app).
+  The Node.js application is deployed on Railway cloud hosting platform. The deployment link is [Voosh Backend Assignment](https://voosh-auth-api-assignment-bhavesh1129.up.railway.app).
