@@ -46,7 +46,7 @@ DBConnection();
 
 // Define routes
 app.get('/', (req, res) => {
-    res.send("Welcome to my application!"); // Default route
+    res.status(200).send("Welcome to my application!"); // Default route/Health check route
 });
 app.use('/auth', authRoutes); // Authentication routes
 app.use('/profile', profileRoutes); // Profile routes
