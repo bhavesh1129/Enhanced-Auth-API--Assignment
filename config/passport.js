@@ -9,7 +9,7 @@ require('dotenv').config(); // Load environment variables
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID, // Google OAuth client ID
   clientSecret: process.env.GOOGLE_CLIENT_SECRET, // Google OAuth client secret
-  callbackURL: `http://localhost:${process.env.PORT}/auth/google/callback` // Google OAuth callback URL
+  callbackURL: 'https://voosh-auth-api-assignment-bhavesh1129.up.railway.app/auth/google/callback' // Google OAuth callback URL
 },
   // Callback function to handle Google OAuth authentication
   async (accessToken, refreshToken, profile, done) => {
